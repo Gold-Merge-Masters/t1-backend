@@ -11,7 +11,7 @@ services:
       - SWAGGER_PATH=docs
       - ADDRESS=http://localhost:3001
       - DB_USER=user
-      - DB_HOST=localhost
+      - DB_HOST=postgres
       - DB_PORT=5432
       - DB_PASSWORD=12345
       - DB_NAME=hackaton
@@ -22,6 +22,6 @@ services:
       - 5432:5432
 
     environment:
-      - POSTGRES_PASSWORD=test_pass
-      - POSTGRES_USER=test_user
-      - POSTGRES_DB=social_db
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_USER=user
+      - POSTGRES_DB=hackaton
