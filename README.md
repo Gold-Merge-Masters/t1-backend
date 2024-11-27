@@ -12,4 +12,5 @@ docker-compose up --build -d
 ```
 http://localhost:3000/docs
 ```
-### 4. Загрузка .csv с датасетом
+### 4. Загрузка .csv с датасетом в Swagger
+![image](https://github.com/user-attachments/assets/acf91990-05da-45d4-8b4c-a0bbd9dff0ea)
