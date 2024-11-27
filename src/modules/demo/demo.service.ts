@@ -8,6 +8,7 @@ import { toCamelCase } from 'src/utilities';
 import { In, Repository } from 'typeorm';
 import { Heap } from './heap/heap';
 import { Source } from 'src/schema/source/source.entity';
+import { Response } from 'express';
 
 @Injectable()
 export class DemoService {
@@ -18,7 +19,10 @@ export class DemoService {
   @InjectRepository(Source)
   private readonly sourceRep: Repository<Source>;
 
-  public async uploadCsv(file: Express.Multer.File): Promise<boolean> {
+  public async uploadCsv(file: Express.Multer.File, res: Response): Promise<boolean> {
+    // res.setHeader('Content-Type', 'application/json');
+    // res.setHeader('Transfer-Encoding', 'chunked');
+
     const columnClientFioName = 'client_fio_full'
     const columnSourceName = 'source_cd'
 
@@ -69,7 +73,7 @@ export class DemoService {
       client => [client.clientFioFull, client]
     ));
 
-    const newClients = rows.map(row => {
+    const newClients = rows.map((row, index) => {
       const rowClient = toCamelCase<IClient>(row);
       const { clientId, clientFioFull, sourceCd, createDate, updateDate, ...etc } = rowClient;
       const dbSource = sourcesMap.get(sourceCd);
@@ -113,7 +117,7 @@ export class DemoService {
           const goldRecordMetas = dbClient[row] as GoldRecordMeta<any>[];
 
           const check = goldRecordMetas.find(meta => meta.data === item.data);
-            
+
           if (check) {
             continue;
           }
@@ -122,18 +126,31 @@ export class DemoService {
           }
           pq.push(item);
         }
-        if(pq['data'].length > 0) {
+        if (pq['data'].length > 0) {
           dbClient[row] = pq['data'];
         } else {
           dbClient[row] = [item];
-        } 
+        }
+        res.write(JSON.stringify({
+          total: rows.length,
+          current: index + 1
+        }, null, 2))
       }
       return dbClient;
     });
+
+    // for (const [idx, _] of newClients.entries()) {
+    //   await new Promise(res => setTimeout(res, 1000));
+    //   res.write(JSON.stringify({
+    //     total: newClients.length,
+    //     current: idx + 1
+    //   }, null, 2))
+    // }
+
     if (newClients.length > 0) {
       const res = await this.clientRep.save(newClients)
     }
-
+    res.end();
     return true;
   }
 
