@@ -5,7 +5,7 @@ import { Readable } from 'node:stream';
 import { GoldRecordMeta, IClient } from 'src/schema/clients/client.interface';
 import { Client } from 'src/schema/clients/clients.entity';
 import { toCamelCase } from 'src/utilities';
-import { In, Repository, UsingJoinTableOnlyOnOneSideAllowedError } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Heap } from './heap/heap';
 import { Source } from 'src/schema/source/source.entity';
 
@@ -73,20 +73,35 @@ export class DemoService {
       const rowClient = toCamelCase<IClient>(row);
       const { clientId, clientFioFull, sourceCd, createDate, updateDate, ...etc } = rowClient;
       const dbSource = sourcesMap.get(sourceCd);
-      const dbClient = clientsMap
-        .get(rowClient.clientFioFull) || this.clientRep.create({
-          clientFioFull: clientFioFull
-        });
+      const dbClient = clientsMap.get(rowClient.clientFioFull) || this.clientRep.create({
+        clientFioFull: clientFioFull
+      });
+
       if (!dbSource) {
         return;
       }
       for (const [row, value] of Object.entries(etc)) {
-        const pq = new Heap<GoldRecordMeta<any>>(
-          (a, b) => a.rate > b.rate
-        )
+        const pq = new Heap<GoldRecordMeta<any>>((a, b) => {
+          if (a.rate !== b.rate) {
+            return a.rate > b.rate;
+          }
+          const aCreated_at = new Date(a.created_at);
+          const bCreated_at = new Date(b.created_at);
 
+          if (aCreated_at !== bCreated_at) {
+            return aCreated_at > bCreated_at;
+          }
+          const aUpdated_at = new Date(a.updated_at);
+          const bUpdated_at = new Date(b.updated_at);
+
+          if (aUpdated_at !== bUpdated_at) {
+            return aUpdated_at > bUpdated_at;
+          }
+        });
+        if (value === 'Рейтинг!') {
+          console.log()
+        }
         const item: GoldRecordMeta<any> = {
-          index: 0,
           data: value,
           source_id: dbSource.id,
           rate: dbSource.rate,
@@ -95,21 +110,46 @@ export class DemoService {
         }
 
         if (dbClient[row] && dbClient[row].length > 0) {
-          for (const it of dbClient[row]) {
+          const goldRecordMetas = dbClient[row] as GoldRecordMeta<any>[];
+
+          const check = goldRecordMetas.find(meta => meta.data === item.data);
+            
+          if (check) {
+            continue;
+          }
+          for (const it of goldRecordMetas) {
             pq.push(it);
           }
+          pq.push(item);
         }
-        pq.push(item);
-        dbClient[row] = pq['data'];
+        if(pq['data'].length > 0) {
+          dbClient[row] = pq['data'];
+        } else {
+          dbClient[row] = [item];
+        } 
       }
       return dbClient;
     });
-    const res = await this.clientRep.save(newClients)
+    if (newClients.length > 0) {
+      const res = await this.clientRep.save(newClients)
+    }
+
     return true;
-    // const raws = new Array(Math.ceil(length / limit)).fill(null).map(
-    //   (_, index) => new Array<Entity>(
-    //     (length / (index + 1)) > limit ? limit : length - (limit * index)
-    //   )
-    // );
+  }
+
+  public async getClients() {
+    const clients = await this.clientRep.find();
+
+    const resClients = clients.map(client => {
+      const { id, clientFioFull, ...etc } = client;
+
+      for (const [key, value] of Object.entries(etc)) {
+        client[key] = client[key][0].data;
+      }
+      client['id'] = id;
+      client['clientFioFull'] = clientFioFull
+      return client;
+    })
+    return resClients;
   }
 }

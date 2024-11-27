@@ -1,5 +1,4 @@
 export interface GoldRecordMeta<T> {
-  index: number;
   data: T;
   source_id: number;
   rate: number;

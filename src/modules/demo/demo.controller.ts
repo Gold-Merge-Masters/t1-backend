@@ -4,7 +4,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadFileDto } from './dto/upload.dto';
 import { ApiConsumes } from '@nestjs/swagger';
 
-@Controller('Demo')
+@Controller('demo')
 export class DemoController {
   @Inject()
   private readonly demoService: DemoService
@@ -17,5 +17,10 @@ export class DemoController {
     @UploadedFile() file: Express.Multer.File
   ): Promise<boolean> {
     return this.demoService.uploadCsv(file);
+  }
+
+  @Get('clients')
+  public async getClients() {
+    return this.demoService.getClients();
   }
 }
