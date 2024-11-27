@@ -131,11 +131,11 @@ export class DemoService {
         } else {
           dbClient[row] = [item];
         }
-        res.write(JSON.stringify({
-          total: rows.length,
-          current: index + 1
-        }, null, 2))
       }
+      res.write(JSON.stringify({
+        total: rows.length,
+        current: index + 1
+      }, null, 2))
       return dbClient;
     });
 
