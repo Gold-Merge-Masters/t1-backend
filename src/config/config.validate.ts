@@ -1,6 +1,8 @@
 import { plainToInstance } from "class-transformer";
 import { validateSync } from "class-validator";
+import { config } from "dotenv";
 
+config()
 
 export function validateEnv<T extends object>(config: new (...args: any[]) => T): T {
   const validatedConfig = plainToInstance(config, process.env, {
