@@ -16,7 +16,12 @@ import { SourceDBModule } from './source/source.module';
         if (!options) {
           throw new Error('Invalid options passed');
         }
-        return addTransactionalDataSource(new DataSource(options));
+        const dataSource = new DataSource(options);
+        await dataSource.initialize();
+        await dataSource.runMigrations();
+        await dataSource.destroy();
+        
+        return addTransactionalDataSource(dataSource);
       },
     }),
   ],
