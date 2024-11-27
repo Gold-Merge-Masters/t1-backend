@@ -20,7 +20,10 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli",
-    "migrate:run": "npm run typeorm migration:run -- -d ./src/schema/datasource.ts"
+    "migrate:generate": "npm run typeorm -- -d ./src/schema/datasource.ts migration:generate ./src/schema/migrations/%migration%",
+    "migrate:run": "npm run typeorm migration:run -- -d ./src/schema/datasource.ts",
+    "migrate:revert": "npm run typeorm -- -d ./src/schema/migrations/database.source.ts migration:revert",
+    "migrate:create": "npm run typeorm -- migration:create ./src/schema/migrations/%migration%"
   },
   "dependencies": {
     "@fast-csv/parse": "^5.0.2",

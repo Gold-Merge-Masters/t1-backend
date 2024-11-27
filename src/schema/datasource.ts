@@ -1,7 +1,8 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
 import { CONFIG_DB } from 'src/config/config.export';
-import { CreateSources1732019544815 } from './schema.seed';
+import { CreateShema1732742287641 } from './migrations/1732742287641-CreateShema';
+import { CreateSources1732742598267 } from './migrations/1732742598267-CreateSources';
 
 dotenv.config();
 
@@ -13,9 +14,12 @@ export const dataSourceUserOption: DataSourceOptions = {
   password: CONFIG_DB.DB_PASSWORD,
   database: CONFIG_DB.DB_NAME,
   migrationsTableName: 'migrations',
-  migrations: [CreateSources1732019544815],
   entities: [__dirname + '/**/*.entity{.ts,.js}'],
-  synchronize: true,
+  synchronize: false,
   logging: false,
+  migrations: [
+    CreateShema1732742287641,
+    CreateSources1732742598267
+  ],
 };
 export const dataSource = new DataSource(dataSourceUserOption);

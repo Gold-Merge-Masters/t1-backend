@@ -1,7 +1,8 @@
-import { In, MigrationInterface, QueryRunner } from 'typeorm';
-import { Source } from './source/source.entity';
+import { In, MigrationInterface, QueryRunner } from "typeorm";
+import { Source } from "../source/source.entity";
 
-export class CreateSources1732019544815 implements MigrationInterface {
+export class CreateSources1732742598267 implements MigrationInterface {
+
   private sources = [
     { source: "Bank", rate: 20 },
     { source: "Bank2", rate: 15 },
